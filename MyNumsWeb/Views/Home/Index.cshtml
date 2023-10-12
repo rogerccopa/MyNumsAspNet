@@ -1,0 +1,37 @@
+﻿@{
+    ViewBag.Title = "Home Page";
+}
+<main>
+    @foreach (var myNum in ViewBag.Nums)
+    {
+    <div class="row mb-2">
+        <div class="col-md-3">@myNum.Number</div>
+        <div class="col-md-3">
+            <input type="text" id="@myNum.Number" name="@myNum.Number" value="@myNum.Note" />
+        </div>
+        <div class="col-md-3">@myNum.Created.ToString("yyyy-MM-dd")</div>
+        <div class="col-md-3">
+            <button type="button" onclick="saveNote('@myNum.Number')">Save</button>
+        </div>
+    </div>
+    }
+</main>
+
+<script>
+    function saveNote(recordId) {
+        const txtNote = document.getElementById(recordId);
+        const apiUrl = "/api/MyNums/S?id=" + recordId + "&note=" + txtNote.value;
+
+        $.ajax({
+            type: "PUT",
+            url: apiUrl,
+            data: "",
+            success: readServerResponse,
+            dataType: "json"
+        });
+    }
+
+    function readServerResponse(data) {
+        alert(data);
+    }
+</script>
