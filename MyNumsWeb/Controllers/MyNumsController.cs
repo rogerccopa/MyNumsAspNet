@@ -42,10 +42,17 @@ namespace MyNumsWeb.Controllers
         [HttpPut]
         public HttpResponseMessage Put(int id, string note)
         {
-            IMyNumsRepo repo = new MyNumsRepo();
-            repo.UpdateNum(id, note);
-
-            return Request.CreateResponse(HttpStatusCode.OK, $"record {id} was updated on Server");
+            try
+            {
+                IMyNumsRepo repo = new MyNumsRepo();
+                repo.UpdateNum(id, note);
+                return Request.CreateResponse(HttpStatusCode.OK, $"record {id} was updated on Server");
+            }
+            catch (System.Exception ex)
+            {
+                var exceptionMsg = ex.Message + " " + (ex.InnerException != null ? ex.InnerException.Message : "");
+                return Request.CreateResponse(HttpStatusCode.InternalServerError, $"Error occurred in Server: {exceptionMsg}");
+            }
         }
 
         // DELETE api/<controller>/5

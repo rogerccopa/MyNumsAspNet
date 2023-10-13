@@ -5,12 +5,12 @@
     @foreach (var myNum in ViewBag.Nums)
     {
     <div class="row mb-2">
-        <div class="col-md-3">@myNum.Number</div>
-        <div class="col-md-3">
-            <input type="text" id="@myNum.Number" name="@myNum.Number" value="@myNum.Note" />
+        <div class="col-3">@myNum.Number</div>
+        <div class="col-4">
+            <input type="text" id="@myNum.Number" name="@myNum.Number" value="@myNum.Note" maxlength="15" size="10" />
         </div>
-        <div class="col-md-3">@myNum.Created.ToString("yyyy-MM-dd")</div>
-        <div class="col-md-3">
+        <div class="col-3">@myNum.Created.ToString("yyyyMMdd")</div>
+        <div class="col-2">
             <button type="button" onclick="saveNote('@myNum.Number')">Save</button>
         </div>
     </div>
