@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Nums</title>
+</head>
+<body>
+    <h1>My Nums</h1>
+    
+    <table>
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Note</th>
+                <th>Created</th>
+                <th>Action</th>
+            </tr>
+        </thead>
+        <tbody id="data-table">
+            <tr><td colspan="4">Loading...</td></tr>
+        </tbody>
+    </table>
+
+    <script>
+        // Relative path: resolves against whatever origin serves this page.
+        // In dev (e.g. Live Server on a different port) this will point to the
+        // wrong place, so it's overridden below when running on localhost.
+        let API_URL = '/mynums';
+        
+        if (location.hostname === 'localhost' || location.hostname === '127.0.0.1')
+        {
+            // Adjust the port here if your API's dev port changes.
+            API_URL = 'https://localhost:5000/mynums';
+        }
+
+        async function loadData() {
+            try {
+                const response = await fetch(API_URL);
+                if (!response.ok) throw new Error('Failed to fetch data');
+                const data = await response.json();
+                renderData(data);
+            } catch (error) {
+                document.getElementById('data-table').innerHTML = 
+                    '<tr><td colspan="4">Error loading data. Ensure the API is running and CORS is enabled.</td></tr>';
+                console.error(error);
+            }
+        }
+
+        function renderData(data) {
+            const tbody = document.getElementById('data-table');
+            tbody.innerHTML = '';
+
+            data.forEach(item => {
+                const tr = document.createElement('tr');
+                
+                // Column 1: Number (Primary Key / Read-only)
+                const tdNum = document.createElement('td');
+                tdNum.textContent = item.number;
+                tr.appendChild(tdNum);
+
+                // Column 2: Note (Editable input)
+                const tdNote = document.createElement('td');
+                const input = document.createElement('input');
+                input.type = 'text';
+                input.value = item.note;
+                input.size = 20; // Makes the input slightly wider to see the text
+                tdNote.appendChild(input);
+                tr.appendChild(tdNote);
+
+                // Column 3: Created (Formatted to yyyy-MM-dd)
+                const tdCreated = document.createElement('td');
+                // Safely extracts the first 10 chars to avoid any timezone shifting issues
+                tdCreated.textContent = item.created.substring(0, 10); 
+                tr.appendChild(tdCreated);
+
+                // Column 4: Update Button
+                const tdAction = document.createElement('td');
+                const btn = document.createElement('button');
+                btn.textContent = 'Update';
+                btn.onclick = () => updateItem(item.number, input.value);
+                tdAction.appendChild(btn);
+                tr.appendChild(tdAction);
+
+                tbody.appendChild(tr);
+            });
+
+            // add tr to enter new number
+            const trNew = document.createElement('tr');
+
+            // column 1: New Number (Input)
+            const tdNewNum = document.createElement('td');
+            tdNewNum.textContent = 'New ID:';
+            trNew.appendChild(tdNewNum);
+
+            // column 2: Empty Note (Input)
+            const tdNewNote = document.createElement('td');
+            const inputNewNum = document.createElement('input');
+            inputNewNum.type = 'number';
+            tdNewNote.appendChild(inputNewNum);
+            trNew.appendChild(tdNewNote);
+
+            // column 3: Empty Created
+            const tdNewCreated = document.createElement('td');
+            const yyyyMMdd = new Intl.DateTimeFormat('fr-CA')
+                .format(new Date())
+                .replace(/-/g, '');
+            tdNewCreated.textContent = yyyyMMdd;
+            trNew.appendChild(tdNewCreated);
+
+            // column 4: Add Button
+            const tdAction = document.createElement('td');
+            const btn = document.createElement('button');
+            btn.textContent = 'Add';
+            btn.onclick = () => addItem(inputNewNum.value);
+            tdAction.appendChild(btn);
+            trNew.appendChild(tdAction);
+
+            tbody.appendChild(trNew);
+        }
+
+        async function updateItem(number, newNote) {
+            try {
+                // Assumed standard RESTful endpoint and PUT method. 
+                // If your API expects a POST request or sends the ID in the body instead of the URL, 
+                // you will need to adjust the URL and method here.
+                const response = await fetch(`${API_URL}`, {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        number: number,
+                        note: newNote
+                    })
+                });
+
+                if (response.ok) {
+                    alert(`Item ${number} updated successfully!`);
+                } else {
+                    alert('Error updating item: ' + response.statusText);
+                }
+            } catch (error) {
+                console.error('Update Error:', error);
+                alert('Network error while updating.');
+            }
+        }
+
+        async function addItem(number) {
+            try {
+                const response = await fetch(API_URL, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        number: number,
+                        note: ''
+                    })
+                });
+
+                if (response.ok) {
+                    alert(`Item ${number} added successfully!`);
+                    // loadData(); // Refresh the data to show the new item
+                } else {
+                    alert('Error adding item: ' + response.statusText);
+                }
+            } catch (error) {
+                console.error('Add Error:', error);
+                alert('Network error while adding.');
+            }
+        }
+
+        // Initialize the page
+        loadData();
+    </script>
+</body>
+</html>
