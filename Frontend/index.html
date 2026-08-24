@@ -163,7 +163,7 @@
                     alert(`Item ${number} added successfully!`);
                     // loadData(); // Refresh the data to show the new item
                 } else {
-                    alert('Error adding item: ' + response.statusText);
+                    alert('Item was NOT added: ' + response.statusText);
                 }
             } catch (error) {
                 console.error('Add Error:', error);

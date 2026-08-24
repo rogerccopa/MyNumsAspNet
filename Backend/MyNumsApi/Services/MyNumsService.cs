@@ -20,12 +20,17 @@ public class MyNumsService : IMyNumsService
             .ToListAsync();
     }
 
-    public Task SaveMyNumAsync(Num num)
+    public Task<bool> SaveMyNumAsync(Num num)
     {
-        _dbCtx.Nums.Add(num);
-        _dbCtx.SaveChangesAsync();
+        var existingNum = _dbCtx.Nums.FirstOrDefault(n => n.Number == num.Number);
+        if (existingNum is null)
+        {
+			_dbCtx.Nums.Add(num);
+			_dbCtx.SaveChangesAsync();
+			return Task.FromResult(true);
+		}
 
-        return Task.CompletedTask;
+        return Task.FromResult(false);
     }
 
     public Task UpdateMyNumAsync(Num num)

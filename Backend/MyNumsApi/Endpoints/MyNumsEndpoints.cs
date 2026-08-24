@@ -15,8 +15,13 @@ public static class MyNumsEndpoints
 
         app.MapPost("/mynums", async (IMyNumsService myNumsService, Num num) =>
         {
-            await myNumsService.SaveMyNumAsync(num);
-            return Results.Created($"/mynums/{num.Number}", num);
+            bool newNumWasAdded = await myNumsService.SaveMyNumAsync(num);
+            if (newNumWasAdded)
+            {
+                return Results.Ok();
+			}
+
+            return Results.BadRequest();
         });
 
         app.MapPut("/mynums", async (IMyNumsService myNumsService, Num num) =>
